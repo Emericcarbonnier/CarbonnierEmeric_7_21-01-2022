@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.js": "/groupamania/static/js/main.0fa4fb90.js",
-    "static/media/enconstruction.png": "/groupamania/static/media/enconstruction.b4c5f3d22eac95fd2ca7.png",
-    "static/media/icon-above-font.svg": "/groupamania/static/media/icon-above-font.73d73abeb17246cc7a2b3a84fa72e042.svg",
-    "static/media/icon-left-font-monochrome-black.svg": "/groupamania/static/media/icon-left-font-monochrome-black.19aa0a7c985187a122d3244aba7e11d0.svg",
-    "index.html": "/groupamania/index.html",
-    "main.0fa4fb90.js.map": "/groupamania/static/js/main.0fa4fb90.js.map"
+    "main.js": "/P7/static/js/main.8fe04322.js",
+    "static/media/enconstruction.png": "/P7/static/media/enconstruction.b4c5f3d22eac95fd2ca7.png",
+    "static/media/icon-above-font.svg": "/P7/static/media/icon-above-font.73d73abeb17246cc7a2b3a84fa72e042.svg",
+    "static/media/icon-left-font-monochrome-black.svg": "/P7/static/media/icon-left-font-monochrome-black.19aa0a7c985187a122d3244aba7e11d0.svg",
+    "index.html": "/P7/index.html",
+    "main.8fe04322.js.map": "/P7/static/js/main.8fe04322.js.map"
   },
   "entrypoints": [
-    "static/js/main.0fa4fb90.js"
+    "static/js/main.8fe04322.js"
   ]
 }
