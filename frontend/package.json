@@ -2,11 +2,11 @@
   "name": "groupamania",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://Emericcarbonnier.github.io/groupamania",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^0.25.0",
     "bootstrap": "^5.1.3",
     "gh-pages": "^3.2.3",
     "react": "^17.0.2",

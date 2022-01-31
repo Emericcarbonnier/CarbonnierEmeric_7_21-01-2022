@@ -1,23 +1,69 @@
-import React from "react";
+import axios from "axios";
+import React, { useState } from "react";
 import img2 from "../img/icon-left-font-monochrome-black.svg";
+import Login from "./Login";
 
 
 const Signin = () => {
+
+  const [formSubmit, setFormSubmit] = useState(false);
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    await axios(
+      {method: 'post',
+      url: 'http://localhost:8080/api/users/register',
+      data:{
+      firstname,
+      lastname,
+      username,
+      email,
+      password,
+    }
+    }
+    )
+    .then((res) => {
+      console.log(res);
+      if (res.data.errors) {
+
+      } else {
+        setFormSubmit(true);
+      }
+    })
+    .catch((err) => console.log(err));
+};
+
   return (
     <div>
-        
-      <form className="w-25 m-auto mh-100 position-absolute top-50 start-50 translate-middle">
+     {formSubmit ? (
+       <>
+          <Login />
+          <h4 className="success">
+            Enregistrement réussi,connecter-vous !
+          </h4>
+        </>
+      ) :( 
+    
+      <form action='' onSubmit={handleRegister} className="w-25 m-auto mh-100 position-absolute top-50 start-50 translate-middle">
       <img src={img2} alt="" className='w-100 d-inline-block mb-5 mt-5'/>
         <div className="mb-3">
           <label htmlFor="validationServer01" className="form-label">
             Prénom
           </label>
           <input
+            name="firstname"
             type="text"
             className="form-control"
             placeholder="Prénom"
             aria-label="Prénom"
             aria-describedby="basic-addon1"
+            onChange={(e) => setFirstname(e.target.value)}
+            value={firstname}
             required
           />
         </div>
@@ -26,11 +72,14 @@ const Signin = () => {
             Nom
           </label>
           <input
+          name="lastname"
             type="text"
             className="form-control"
             placeholder="Nom"
             aria-label="LastName"
             aria-describedby="basic-addon1"
+            onChange={(e) => setLastname(e.target.value)}
+            value={lastname}
             required
           />
         </div>
@@ -40,11 +89,14 @@ const Signin = () => {
           </label>
           <div className="input-group has-validation">
             <input
+            name="username"
               type="text"
               className="form-control"
               placeholder="Nom d'utilisateur"
               aria-label="Username"
               aria-describedby="basic-addon1"
+              onChange={(e) => setUsername(e.target.value)}
+            value={username}
               required
             />
             <div id="validationServerUsernameFeedback" className="invalid-feedback">
@@ -58,11 +110,14 @@ const Signin = () => {
              Adresse e-mail
             </label>
             <input
+            name="email"
               type="email"
               className="form-control"
               id="exampleInputEmail1"
               placeholder="Email@exemple.com"
               aria-describedby="emailHelp"
+              onChange={(e) => setEmail(e.target.value)}
+            value={email}
               required
             />
             <div id="emailHelp" className="form-text">
@@ -75,10 +130,13 @@ const Signin = () => {
             Mot de passe
           </label>
           <input
+          name="password"
             type="password"
             id="inputPassword5"
             className="form-control"
             aria-describedby="passwordHelpBlock"
+            onChange={(e) => setPassword(e.target.value)}
+            value={password}
             required
           />
           <div id="passwordHelpBlock" className="form-text">
@@ -91,7 +149,8 @@ const Signin = () => {
           </button>
           <p className='fs-5'>Vous avez déjà un compte ? <a href='/' className="pe-auto fs-5">Connexion</a></p>
         </div>
-      </form>
+      </form>)
+    };
     </div>
   );
 };

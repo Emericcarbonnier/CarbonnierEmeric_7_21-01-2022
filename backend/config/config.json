@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "root",
+    "password": "admin",
+    "database": "database_development_groupomania",
+    "host": "127.0.0.1",
+    "dialect": "mariadb"
+  },
+  "test": {
+    "username": "root",
+    "password": "admin",
+    "database": "database_test_groupomania",
+    "host": "127.0.0.1",
+    "dialect": "mariadb"
+  },
+  "production": {
+    "username": "root",
+    "password": "admin",
+    "database": "database_production_groupomania",
+    "host": "127.0.0.1",
+    "dialect": "mariadb"
+  }
+}
