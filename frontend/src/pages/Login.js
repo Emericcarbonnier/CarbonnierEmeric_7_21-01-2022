@@ -5,12 +5,12 @@ const axios = require ('axios')
 const Home = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState('')
 
   const handleLogin = (e) => {
     e.preventDefault();
 
-    const emailError = document.querySelector(".emailerror");
-    const passwordError = document.querySelector(".passworderror");
+
 
     axios({
       method: "post",
@@ -23,19 +23,23 @@ const Home = () => {
     })
     .then((res) => {
       console.log(res);
-      if (res === 404) {
-        emailError.innerHTML = 'email invalide';}
-      if (res === 403) {
-        passwordError.innerHTML = 'MDP invalide';
-     
-      } else {
+      console.log("sa passe ici")
         window.location = "/home";
-      }
+
+    })
+    .catch((error) => {
+      console.log(error.response)
+      console.log(error.response.status)
+      console.log(error.response.data.error)
+      setErrorMessage(error.response.data.error)
+
+      
     })
   };
 
   return (
     <div>
+   
       <form
         action=""
         onSubmit={handleLogin}
@@ -43,6 +47,10 @@ const Home = () => {
         className="w-15 position-absolute top-50 start-50 translate-middle"
       >
         <img src={img3} alt="" className="w-100" />
+
+        { errorMessage !== '' ? <div class="alert alert-danger">{errorMessage}</div> : '' }
+
+
         <div className="mb-3">
           <label htmlFor="exampleInputEmail1" className="form-label">
             Nom d'utilisateur
@@ -57,7 +65,6 @@ const Home = () => {
           />
 
         </div>
-        <div className="emailerror"></div>
         <div className="mb-3">
           <label htmlFor="exampleInputPassword1" className="form-label">
             Mot de passe

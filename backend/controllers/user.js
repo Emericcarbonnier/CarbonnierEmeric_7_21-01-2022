@@ -89,8 +89,12 @@ exports.login = (req, res, next) => {
     let email    = req.body.email;
     let password = req.body.password;
 
-    if (email == null ||  password == null) {
+console.log('username:',email)
+console.log('password:',password)
+
+    if (email == '' ||  password == '' ) {
       return res.status(400).json({ 'error': 'missing parameters' });
+
     }
 
     asyncLib.waterfall([
@@ -106,6 +110,7 @@ exports.login = (req, res, next) => {
           return res.status(500).json({errors});
         });
       },
+
       function(userFound, done) {
         if (userFound) {
           bcrypt.compare(password, userFound.password, function(errBycrypt, resBycrypt) {
@@ -115,6 +120,7 @@ exports.login = (req, res, next) => {
           return res.status(404).json({error: 'user not exist in DB' });
         }
       },
+
       function(userFound, resBycrypt, done) {
         if(resBycrypt) {
           done(userFound);
@@ -122,6 +128,7 @@ exports.login = (req, res, next) => {
           return res.status(403).json({error: 'invalid password'});
         }
       }
+      
     ], function(userFound) {
       if (userFound) {
         return res.status(201).json({

@@ -1,6 +1,7 @@
 // Imports
-var express      = require('express');
-var usersCtrl    = require('./routes/user');
+const express      = require('express');
+const usersCtrl    = require('./routes/user');
+// const postCtrl    = require('./routes/post');
 
 // Router
 
@@ -15,6 +16,7 @@ app.use((req, res, next) => {
 
   // Users routes
  app.use('/users', usersCtrl);
+//  app.use('/post', postCtrl)
 
 
 app.use(express.json());
