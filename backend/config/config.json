@@ -2,21 +2,21 @@
   "development": {
     "username": "root",
     "password": "admin",
-    "database": "database_development_groupomania",
+    "database": "social_network",
     "host": "127.0.0.1",
     "dialect": "mariadb"
   },
   "test": {
     "username": "root",
     "password": "admin",
-    "database": "database_test_groupomania",
+    "database": "groupomania_test",
     "host": "127.0.0.1",
     "dialect": "mariadb"
   },
   "production": {
     "username": "root",
     "password": "admin",
-    "database": "database_production_groupomania",
+    "database": "groupomania_production",
     "host": "127.0.0.1",
     "dialect": "mariadb"
   }

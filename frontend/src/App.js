@@ -1,20 +1,63 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route} from "react-router-dom";
-import Login from "./pages/Login";
-import Signin from "./pages/Signin";
-import Home from "./pages/Home";
-import Error from "./pages/Error"
+import React from "react";
+import {
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
+import { useState } from "react";
+import Header from "./components/Header/Header";
+import LoggedHeader from "./components/Header/LoggedHeader";
+import LoginForm from "./components/LoginForm/LoginForm";
+import RegistrationForm from "./components/RegistrationForm/RegistrationForm";
+import {isLogged} from "./_utils/auth/auth.functions";
+import MessagesContainer from "./components/Messages/MessagesContainer";
+import { ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(isLogged())
+  
+
+  const handleLogout = () => {
+    setIsLoggedIn(false)
+  }
+
+  const handleLogin = () => {
+    setIsLoggedIn(true)
+  }
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/signin" element={<Signin />} />
-        <Route path="/home" element={<Home />} />
-        <Route path ='*' element={<Error />} />
-      </Routes>
-    </BrowserRouter>
+    
+    <React.Fragment>
+      <ToastContainer position="top-center"/>
+      
+
+      {isLoggedIn ? <LoggedHeader onLogout={handleLogout} /> : <Header />}
+      <main className="">
+      <Switch>
+
+     
+      <Route path="/" exact>
+        {isLoggedIn ? <MessagesContainer messageQuery="getMessages" postMessage={true} />  : <Redirect to="/login" />}
+        </Route>
+
+   
+        <Route path="/login">
+          <LoginForm onLogin={handleLogin} />
+        </Route>
+
+     
+        <Route path="/signup" component={RegistrationForm} />
+
+
+        <Route path="/messages/:id" exact>
+        {isLoggedIn ? <MessagesContainer messageQuery="getOneMessage" />  : <Redirect to="/login" />}
+        </Route>
+
+      </Switch>
+      </main>
+    </React.Fragment>
   );
 };
 

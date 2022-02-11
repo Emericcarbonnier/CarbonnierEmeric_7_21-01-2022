@@ -1,143 +1,169 @@
-const bcrypt = require('bcrypt')
-const models = require('../models')
-const jwtUtils  = require('../utils/jwt.utils')
-const asyncLib = require ('async')
+const bcrypt = require("bcrypt");
+const cryptoJS = require("crypto-js");
+const functions = require("./functions");
+const models = require("../models");
 
-const EMAIL_REGEX     = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const PASSWORD_REGEX  = /^(?=.*\d).{4,20}$/;
+const EMAIL_REGEX =
+  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+const MAX_LOGIN_ATTEMPTS = 3;
 
-exports.register = (req, res, next) => {
+exports.signup = (req, res, next) => {
+  let name = req.body.name;
+  let surname = req.body.surname;
+  let password = req.body.password;
 
-       let firstname = req.body.firstname;
-       let lastname = req.body.lastname;
-       let email = req.body.email;
-       let username = req.body.username;
-       let password = req.body.password;
+  // Hash email
+  let emailHash = cryptoJS.MD5(req.body.email).toString();
 
-       if (email == null || username == null || password == null || firstname == null || lastname == null){
-           return res.status(400).json ({'error' : 'missing parameters'})
-       }
-       if (username.length >= 21 || username.length <= 4) {
-        return res.status(400).json({ 'error': 'wrong username (must be length 5 - 20)' });
-      }
-  
-      if (!EMAIL_REGEX.test(email)) {
-        return res.status(400).json({ 'error': 'email is not valid' });
-      }
-  
-      if (!PASSWORD_REGEX.test(password)) {
-        return res.status(400).json({ 'error': 'password invalid (must length 4 - 8 and include 1 number at least)' });
-      }
-  
-      asyncLib.waterfall([
-        function(done) {
-          models.User.findOne({
-            attributes: ['email'],
-            where: { email: email }
-          })
-          .then(function(userFound) {
-            done(null, userFound);
-          })
-          .catch(function(err) {
-            return res.status(500).json({ 'error': 'unable to verify user' });
-          });
-        },
-        function(userFound, done) {
-          if (!userFound) {
-            bcrypt.hash(password, 5, function( err, bcryptedPassword ) {
-              done(null, userFound, bcryptedPassword);
-            });
-          } else {
-            return res.status(409).json({ 'error': 'user already exist' });
-          }
-        },
+  let emailEncrypted = cryptoJS.AES.encrypt(
+    req.body.email,
+    "Secret Passphrase"
+  ).toString();
 
-        function(userFound, bcryptedPassword, done) {
-          const newUser = models.User.create({
-            firstname: firstname,
-            lastname: lastname,
-            email: email,
-            username: username,
-            password: bcryptedPassword,
-            isAdmin: 0
-          })
+  if (
+    emailHash == null ||
+    name == null ||
+    surname == null ||
+    password == null
+  ) {
+    return res.status(400).json({ error: "missing parameters" });
+  }
 
-          .then(function(newUser) {
-            done(newUser);
-          })
+  if (
+    name.length >= 20 ||
+    name.length < 2 ||
+    surname.length >= 20 ||
+    surname.length < 2
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Wrong name or surname (must be length 2 - 30)" });
+  }
 
-          .catch(function(err) {
-            return res.status(500).json({ 'error': 'cannot add user' });
-          });
-        }
-      ], 
-      
-      function(newUser) {
-        if (newUser) {
-          return res.status(201).json({
-            'userId': newUser.id
-          });
-        } else {
-          return res.status(500).json({ 'error': 'cannot add user' });
-        }
-      });
+  if (!EMAIL_REGEX.test(req.body.email)) {
+    return res.status(400).json({ error: "email is not valid" });
+  }
 
-    }
-
-exports.login = (req, res, next) => {
-    let email    = req.body.email;
-    let password = req.body.password;
-
-console.log('username:',email)
-console.log('password:',password)
-
-    if (email == '' ||  password == '' ) {
-      return res.status(400).json({ 'error': 'missing parameters' });
-
-    }
-
-    asyncLib.waterfall([
-      function(done) {
-        models.User.findOne({
-          where: { email: email }
-        })
-        .then(function(userFound) {
-          done(null, userFound);
-        })
-        .catch(function(err) {
-          const errors = signInErrors(err)
-          return res.status(500).json({errors});
-        });
-      },
-
-      function(userFound, done) {
-        if (userFound) {
-          bcrypt.compare(password, userFound.password, function(errBycrypt, resBycrypt) {
-            done(null, userFound, resBycrypt);
-          });
-        } else {
-          return res.status(404).json({error: 'user not exist in DB' });
-        }
-      },
-
-      function(userFound, resBycrypt, done) {
-        if(resBycrypt) {
-          done(userFound);
-        } else {
-          return res.status(403).json({error: 'invalid password'});
-        }
-      }
-      
-    ], function(userFound) {
-      if (userFound) {
-        return res.status(201).json({
-          'userId': userFound.id,
-          'token': jwtUtils.generateTokenForUser(userFound)
-        });
-      } else {
-        return res.status(500).json({ 'error': 'cannot log on user' });
-      }
+  if (!functions.checkPassword(password)) {
+    return res.status(400).json({
+      error: "Password is not valid (must be length min 4 and include 1 number",
     });
   }
 
+  models.User.findOne({
+    attributes: ["emailHash"],
+    where: { emailHash: emailHash },
+  })
+    .then((user) => {
+      if (!user) {
+        bcrypt
+          .hash(password, 10)
+          .then(async (hash) => {
+            const newUser = await models.User.create({
+              name: name,
+              surname: surname,
+              email: emailEncrypted,
+              emailHash: emailHash,
+              password: hash,
+              admin: 0,
+            });
+            newUser
+              .save()
+              .then(() =>
+                res.status(201).json({
+                  message:
+                    "Utilisateur créé ! " + "userId " + ": " + newUser.id,
+                })
+              )
+              .catch((error) => res.status(400).json({ error }));
+          })
+          .catch((error) => res.status(500).json({ error }));
+      } else {
+        return res.status(409).json({ error: "email already used" });
+      }
+    })
+    .catch((error) => {
+      return res.status(500).json({ error: "unable to verify user" });
+    });
+};
+
+exports.login = (req, res, next) => {
+  console.log("email: " + req.body.email + " password: " + req.body.password);
+  let emailHash = cryptoJS.MD5(req.body.email).toString();
+  let password = req.body.password;
+
+  if (emailHash == null || password == null) {
+    return res.status(400).json({ error: "Missing parameters" });
+  }
+
+  models.User.findOne({
+    where: { emailHash: emailHash },
+  })
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(401)
+          .json({ error: "Nom d'utilisateur (ou mot de passe) incorrect" });
+      }
+
+      if (functions.checkIfAccountIsLocked(user.lock_until)) {
+        let waitingTime = (user.lock_until - Date.now()) / 1000 / 60;
+        return res.status(401).json({
+          error: "Compte bloqué, revenez dans: " + waitingTime + " minutes",
+        });
+      }
+
+      if (user.lock_until && user.lock_until <= Date.now()) {
+        functions
+          .resetUserLockAttempt(emailHash, user)
+
+          .then(() => {
+            bcrypt
+              .compare(req.body.password, user.password)
+              .then((valid) => {
+                if (!valid) {
+                  functions.sendNewToken(user._id, res);
+                }
+              })
+              .catch((error) => res.status(500).json({ error }));
+          })
+          .catch((error) => console.log({ error }));
+        //
+      } else {
+        bcrypt
+          .compare(req.body.password, user.password)
+          .then((valid) => {
+            if (!valid && user.login_attempts + 1 >= MAX_LOGIN_ATTEMPTS) {
+              console.log(
+                "Limite d'essai de connection atteinte, blockage du compte"
+              );
+              functions
+                .blockUserAccount(emailHash, user)
+                .catch((error) => console.log({ error }));
+              return res.status(401).json({
+                error:
+                  "Mot de passe (ou email) incorrect ! Vous avez atteint le nombre maximum d'essai, votre compte est maintenant bloqué!",
+              });
+            }
+
+            if (user.login_attempts > 0) {
+              functions
+                .resetUserLockAttempt(emailHash, user)
+                .then(() => {
+                  functions.sendNewToken(user, res);
+                })
+                .catch((error) => console.log({ error }));
+            } else {
+              functions.sendNewToken(user, res);
+            }
+          })
+          .catch((error) => res.status(500).json({ error: error }));
+      }
+    })
+    .catch((error) => res.status(500).json({ error }));
+};
+
+exports.logout = (req, res, next) => {
+  functions.eraseCookie(res);
+};
