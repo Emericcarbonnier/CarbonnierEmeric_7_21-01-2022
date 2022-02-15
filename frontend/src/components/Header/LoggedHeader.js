@@ -1,8 +1,10 @@
 import { useHistory } from "react-router-dom";
 import logo from "../../images/icon.png";
 import { logout } from "../../_utils/auth/auth.functions";
+import {getIdFromCookie} from "../../_utils/auth/auth.functions";
 
 const LoggedHeader = ({ onLogout }) => {
+  const idFromCookie = getIdFromCookie();
   let history = useHistory();
 
   const onClickLogout = (e) => {
@@ -25,7 +27,7 @@ const LoggedHeader = ({ onLogout }) => {
         </a>
 
         <div>
-          <a className="navbar-brand" href={"/"}>
+          <a className="navbar-brand" href={"/account/" + idFromCookie}>
             Compte
           </a>
           <a className="navbar-brand" href="/login" onClick={onClickLogout}>

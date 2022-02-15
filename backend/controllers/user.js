@@ -167,3 +167,117 @@ exports.login = (req, res, next) => {
 exports.logout = (req, res, next) => {
   functions.eraseCookie(res);
 };
+
+exports.getUserProfile = (req, res, next) => {
+  // Getting auth header
+  let userInfos = functions.getInfosUserFromToken(req, res);
+  let CurrentUserId = req.params.id;
+
+  if (userInfos.userId < 0) {
+    return res.status(400).json({ error: "Wrong token" });
+  }
+
+  models.User.findOne({
+    attributes: ["id", "name", "surname", "email", "createdAt"],
+    where: { id: CurrentUserId },
+  })
+    .then((user) => {
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+      }
+      if ((user && user.id === userInfos.userId) || userInfos.admin === true) {
+        user.dataValues.canEdit = true;
+        if (userInfos.admin === true) {
+          user.dataValues.isAdmin = true;
+          res.status(200).json(user);
+        } else {
+          res.status(200).json(user);
+        }
+      } else if (user) {
+        res.status(200).json(user);
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Cannot fetch user" });
+    });
+};
+
+exports.updateUserProfile = (req, res, next) => {
+  // Getting auth header
+  let userInfos = functions.getInfosUserFromToken(req, res);
+  let CurrentUserId = req.params.id;
+
+  if (userInfos.userId < 0) {
+    return res.status(400).json({ error: "Wrong token" });
+  }
+
+  // Params
+  let name = req.body.name;
+  let surname = req.body.surname;
+
+  models.User.findOne({
+    attributes: ["id", "name", "surname"],
+    where: { id: CurrentUserId },
+  })
+    .then((user) => {
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+      }
+      if ((user && user.id === userInfos.userId) || userInfos.admin === true) {
+        user
+          .update({
+            name: name ? name : user.name,
+            surname: surname ? surname : user.surname,
+          })
+          .then((updated) => {
+            if (updated) {
+              res.status(201).json("Profile mis à jour");
+            } else {
+              res.status(500).json({ error: "Cannot update profile" });
+            }
+          });
+      } else {
+        res.status(400).json({ error: "User not found" });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Unable to verify user" });
+    });
+};
+
+exports.deleteUserProfile = (req, res) => {
+  let userInfos = functions.getInfosUserFromToken(req, res);
+  let CurrentUserId = req.params.id;
+
+  if (userInfos.userId < 0) {
+    return res.status(400).json({ error: "Wrong token" });
+  }
+
+  models.User.findOne({
+    where: { id: CurrentUserId },
+    attributes: ["id", "name", "surname", "email", "createdAt"],
+  })
+    .then((user) => {
+      console.log(user.id);
+      console.log(userInfos.userId);
+      console.log(userInfos.admin);
+      
+
+      if ((user && user.id === userInfos.userId) || userInfos.admin === true) {
+        async function destroyUser(userId) {
+          await models.User.destroy({
+            where: { id: userId },
+          });
+        }
+        destroyUser(user.id)
+          .then(() => {
+            console.log("User supprimé");
+            res.status(200).json({ message: "User supprimé !" });
+          })
+          .catch((error) => res.status(400).json({ error }));
+      }
+    })
+    .catch((error) => {
+      return res.status(404).json({ error: error });
+    });
+};

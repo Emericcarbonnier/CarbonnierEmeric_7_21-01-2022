@@ -61,4 +61,31 @@ function logout(page) {
     .catch((error) => console.log(error));
 }
 
-export { getEmailFromCrypto, REGEX, getIdFromCookie, isLogged, logout };
+const getAccount = (accountId, page) => {
+  const requestOptions = {
+    method: "GET",
+    credentials: "include",
+  };
+  return fetchApi(`auth/account/${accountId}`, page, requestOptions);
+};
+
+const deleteAccount = (accountId, page) => {
+  const requestOptions = {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  };
+
+  return fetchApi(`auth/account/${accountId}`, page, requestOptions)
+    
+};
+
+export {
+  getEmailFromCrypto,
+  REGEX,
+  getAccount,
+  deleteAccount,
+  getIdFromCookie,
+  isLogged,
+  logout,
+};
