@@ -40,7 +40,6 @@ console.log(message.imageUrl)
         {message.teaserMessage ? (
           <p className="card-text text-teaser overflow-hidden">
             {message.content}
-            <img src={message.imageUrl} alt="" />
           </p>
         ) : (
           <p className="card-text">{message.content}</p>

@@ -26,18 +26,10 @@ exports.createMessage = (req, res) => {
   })
     .then((user) => {
       if (user) {
-        let imageUrl = null;
-
-        if (req.file) {
-          imageUrl = `${req.protocol}://${req.get("host")}/images/${
-            req.file.filename
-          }`;
-        }
 
         models.Message.create({
           title: title,
           content: content,
-          imageUrl: imageUrl,
           likes: 0,
           UserId: user.id,
         })

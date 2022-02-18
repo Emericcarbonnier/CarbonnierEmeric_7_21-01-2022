@@ -40,10 +40,10 @@ const RegistrationForm = () => {
   };
 
   return (
-    <section className="row mx-auto justify-content-center w-75">
+    <section className="row mx-auto justify-content-center w-50">
       <div className="card col-11">
         <img
-          className="mx-auto"
+          className="mx-auto w-50"
           src={logo}
           alt="logo of the company Groupomania"
         />

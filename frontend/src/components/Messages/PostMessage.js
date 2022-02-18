@@ -7,37 +7,35 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 const PostMessage = ({ onPost }) => {
   const [titleValue, setTitleValue] = useState("");
   const [contentValue, setContentValue] = useState("");
-  const [imageValue, setImageValue] = useState(null);
 
   async function SendData(e) {
     e.preventDefault();
-
-    const formData = new FormData();
-    formData.append("image", imageValue);
-    formData.append("title", titleValue);
-    formData.append("content", contentValue);
+    console.log(titleValue, contentValue);
 
     const requestOptions = {
       method: "POST",
-     credentials: "include",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        title: titleValue,
+        content: contentValue,
+      }),
     };
-
     await fetch("http://localhost:3000/api/messages/new", requestOptions)
       .then((response) => {
         if (response.status !== 201) {
+
         } else {
           onPost();
           setTitleValue("");
           setContentValue("");
-          setImageValue(null);
           toastMessagePosted();
         }
       })
 
       .catch((error) => console.log(error));
-  }
 
+  }
   return (
     <section className="row justify-content-center mb-5">
       <form
@@ -81,18 +79,6 @@ const PostMessage = ({ onPost }) => {
                     minLength="5"
                     onChange={(event) => setContentValue(event.target.value)}
                   ></textarea>
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">
-                    Default file input example
-                  </label>
-                  <input
-                    className="form-control"
-                    name="image"
-                    type="file"
-                    id="formFile"
-                    onChange={(event) => setImageValue(event.target.files[0])}
-                  />
                 </div>
               </div>
             </div>

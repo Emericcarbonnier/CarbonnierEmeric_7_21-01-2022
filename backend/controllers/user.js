@@ -8,6 +8,15 @@ const EMAIL_REGEX =
 
 const MAX_LOGIN_ATTEMPTS = 3;
 
+function incrementLoginAttempt(emailHash, loginAttempts) {
+  User.update(
+    { login_attempts: loginAttempts.login_attempts + 1 },
+    {
+      where: { emailHash: emailHash },
+    }
+  );
+}
+
 exports.signup = (req, res, next) => {
   let name = req.body.name;
   let surname = req.body.surname;
@@ -89,7 +98,6 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-  console.log("email: " + req.body.email + " password: " + req.body.password);
   let emailHash = cryptoJS.MD5(req.body.email).toString();
   let password = req.body.password;
 
@@ -117,12 +125,20 @@ exports.login = (req, res, next) => {
       if (user.lock_until && user.lock_until <= Date.now()) {
         functions
           .resetUserLockAttempt(emailHash, user)
-
+          //
           .then(() => {
             bcrypt
               .compare(req.body.password, user.password)
               .then((valid) => {
                 if (!valid) {
+                  functions
+                    .incrementLoginAttempt(emailHash, user)
+                    .catch((error) => console.log({ error }));
+                  //
+                  return res
+                    .status(401)
+                    .json({ error: "Mot de passe (ou email) incorrect !" });
+                } else {
                   functions.sendNewToken(user._id, res);
                 }
               })
@@ -135,9 +151,6 @@ exports.login = (req, res, next) => {
           .compare(req.body.password, user.password)
           .then((valid) => {
             if (!valid && user.login_attempts + 1 >= MAX_LOGIN_ATTEMPTS) {
-              console.log(
-                "Limite d'essai de connection atteinte, blockage du compte"
-              );
               functions
                 .blockUserAccount(emailHash, user)
                 .catch((error) => console.log({ error }));
@@ -145,6 +158,20 @@ exports.login = (req, res, next) => {
                 error:
                   "Mot de passe (ou email) incorrect ! Vous avez atteint le nombre maximum d'essai, votre compte est maintenant bloqué!",
               });
+            }
+
+            if (!valid && user.login_attempts + 1 < MAX_LOGIN_ATTEMPTS) {
+        
+
+              try {
+                functions.incrementLoginAttempt(emailHash, user);
+              } catch (e) {
+                console.log(e);
+              }
+              //
+              return res
+                .status(401)
+                .json({ error: "Mot de passe (ou email) incorrect !" });
             }
 
             if (user.login_attempts > 0) {
@@ -169,7 +196,6 @@ exports.logout = (req, res, next) => {
 };
 
 exports.getUserProfile = (req, res, next) => {
-  // Getting auth header
   let userInfos = functions.getInfosUserFromToken(req, res);
   let CurrentUserId = req.params.id;
 
@@ -197,13 +223,10 @@ exports.getUserProfile = (req, res, next) => {
         res.status(200).json(user);
       }
     })
-    .catch((error) => {
-      res.status(500).json({ error: "Cannot fetch user" });
-    });
+
 };
 
 exports.updateUserProfile = (req, res, next) => {
-  // Getting auth header
   let userInfos = functions.getInfosUserFromToken(req, res);
   let CurrentUserId = req.params.id;
 
@@ -258,10 +281,6 @@ exports.deleteUserProfile = (req, res) => {
     attributes: ["id", "name", "surname", "email", "createdAt"],
   })
     .then((user) => {
-      console.log(user.id);
-      console.log(userInfos.userId);
-      console.log(userInfos.admin);
-      
 
       if ((user && user.id === userInfos.userId) || userInfos.admin === true) {
         async function destroyUser(userId) {
@@ -271,7 +290,6 @@ exports.deleteUserProfile = (req, res) => {
         }
         destroyUser(user.id)
           .then(() => {
-            console.log("User supprimé");
             res.status(200).json({ message: "User supprimé !" });
           })
           .catch((error) => res.status(400).json({ error }));
