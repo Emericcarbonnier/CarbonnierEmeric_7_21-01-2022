@@ -22,18 +22,18 @@ bcrypt
     })
     .catch((error) => res.status(500).json({ error }));
 }
-
+ 
 function checkPassword(password) {
 
   const regularExp = RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{4,}$");
   if (regularExp.test(password)) {
     console.log("Strong password!");
-    return true;
+    return true;  
   } else {
     console.log("Weak password!");
     return false;
   }
-}
+} 
 
 function checkIfAccountIsLocked(userLockUntil) {
   console.log("Dans checkIfAccountIsLock");

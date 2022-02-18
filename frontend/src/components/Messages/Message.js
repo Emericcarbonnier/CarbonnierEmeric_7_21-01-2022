@@ -10,7 +10,7 @@ const Message = ({ ...message }) => {
       window.location.href = "/";
     }
   };
-
+console.log(message.imageUrl)
   return (
     <div className="card">
       <div className="card-header">
@@ -40,6 +40,7 @@ const Message = ({ ...message }) => {
         {message.teaserMessage ? (
           <p className="card-text text-teaser overflow-hidden">
             {message.content}
+            <img src={message.imageUrl} alt="" />
           </p>
         ) : (
           <p className="card-text">{message.content}</p>

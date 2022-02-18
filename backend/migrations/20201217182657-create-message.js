@@ -27,6 +27,11 @@ module.exports = {
         allowNull: false,
         type: Sequelize.TEXT,
       },
+      
+      imageUrl: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
       likes: {
         default: 0,
         allowNull: false,

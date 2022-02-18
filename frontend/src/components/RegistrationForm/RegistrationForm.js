@@ -40,7 +40,7 @@ const RegistrationForm = () => {
   };
 
   return (
-    <section className="row mx-auto justify-content-center w-25">
+    <section className="row mx-auto justify-content-center w-75">
       <div className="card col-11">
         <img
           className="mx-auto"

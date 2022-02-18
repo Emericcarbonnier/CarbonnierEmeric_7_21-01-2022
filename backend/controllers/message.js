@@ -1,5 +1,6 @@
 const models = require("../models");
 const functions = require("./functions");
+const fs = require("fs");
 
 exports.createMessage = (req, res) => {
   let userInfos = functions.getInfosUserFromToken(req, res);
@@ -25,9 +26,18 @@ exports.createMessage = (req, res) => {
   })
     .then((user) => {
       if (user) {
+        let imageUrl = null;
+
+        if (req.file) {
+          imageUrl = `${req.protocol}://${req.get("host")}/images/${
+            req.file.filename
+          }`;
+        }
+
         models.Message.create({
           title: title,
           content: content,
+          imageUrl: imageUrl,
           likes: 0,
           UserId: user.id,
         })
@@ -197,26 +207,43 @@ exports.deleteMessage = (req, res) => {
       },
     ],
   })
-    .then((messages) => {
-      //console.log(messages.dataValues)
-
+    .then((message) => {
       if (
-        (messages && messages.UserId === userInfos.userId) ||
+        (message && message.UserId === userInfos.userId) ||
         userInfos.admin === true
       ) {
-        models.Message.destroy({
-          where: { id: messageId },
-          include: [
-            {
-              model: models.User,
-              attributes: ["name", "surname", "id"],
-            },
-          ],
-        })
-          .then(() => {
-            res.status(200).json({ message: "Objet supprimé !" });
+        if (message.imageUrl) {
+          const filename = message.imageUrl.split("/images/")[1];
+          fs.unlink(`images/${filename}`, () => {
+            models.Message.destroy({
+              where: { id: messageId },
+              include: [
+                {
+                  model: models.User,
+                  attributes: ["name", "surname", "id"],
+                },
+              ],
+            })
+              .then(() => {
+                res.status(200).json({ message: "Objet supprimé !" });
+              })
+              .catch((error) => res.status(400).json({ error }));
+          });
+        } else {
+          models.Message.destroy({
+            where: { id: messageId },
+            include: [
+              {
+                model: models.User,
+                attributes: ["name", "surname", "id"],
+              },
+            ],
           })
-          .catch((error) => res.status(400).json({ error }));
+            .then(() => {
+              res.status(200).json({ message: "Objet supprimé !" });
+            })
+            .catch((error) => res.status(400).json({ error }));
+        }
       }
     })
     .catch((error) => {

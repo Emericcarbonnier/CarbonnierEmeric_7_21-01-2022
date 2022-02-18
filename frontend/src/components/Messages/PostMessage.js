@@ -2,43 +2,49 @@ import React, { useState } from "react";
 import { toastMessagePosted } from "../../_utils/toasts/messages";
 import "react-toastify/dist/ReactToastify.css";
 import { REGEX } from "../../_utils/auth/auth.functions";
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
 const PostMessage = ({ onPost }) => {
   const [titleValue, setTitleValue] = useState("");
   const [contentValue, setContentValue] = useState("");
+  const [imageValue, setImageValue] = useState(null);
 
   async function SendData(e) {
     e.preventDefault();
-    console.log(titleValue, contentValue);
+
+    const formData = new FormData();
+    formData.append("image", imageValue);
+    formData.append("title", titleValue);
+    formData.append("content", contentValue);
 
     const requestOptions = {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        title: titleValue,
-        content: contentValue,
-      }),
+     credentials: "include",
+      body: formData,
     };
+
     await fetch("http://localhost:3000/api/messages/new", requestOptions)
       .then((response) => {
         if (response.status !== 201) {
-
         } else {
           onPost();
           setTitleValue("");
           setContentValue("");
+          setImageValue(null);
           toastMessagePosted();
         }
       })
 
       .catch((error) => console.log(error));
-
   }
 
   return (
     <section className="row justify-content-center mb-5">
-      <form className="col-11" onSubmit={SendData}>
+      <form
+        className="col-11"
+        encType="multipart/form-data"
+        onSubmit={SendData}
+      >
         <div className="card">
           <div className="card-header ">Publier un article</div>
           <div className="card-body">
@@ -75,6 +81,18 @@ const PostMessage = ({ onPost }) => {
                     minLength="5"
                     onChange={(event) => setContentValue(event.target.value)}
                   ></textarea>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">
+                    Default file input example
+                  </label>
+                  <input
+                    className="form-control"
+                    name="image"
+                    type="file"
+                    id="formFile"
+                    onChange={(event) => setImageValue(event.target.files[0])}
+                  />
                 </div>
               </div>
             </div>
