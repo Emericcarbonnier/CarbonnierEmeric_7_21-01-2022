@@ -41,7 +41,37 @@ function getIdFromCookie() {
   }
 }
 
-function logout(page) {
+function login(email, password, page) {
+  const requestOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      email: email,
+      password: password,
+    }),
+  };
+
+  return fetchApi("auth/login", page, requestOptions);
+}
+
+function signup(name, surname, email, password, page){
+  const requestOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      name: name,
+      surname: surname,
+      email: email,
+      password: password,
+    }),
+  };
+
+  return fetchApi("auth/signup", page, requestOptions);
+}
+
+async function logout(page) {
   Cookies.remove("groupomania");
   Cookies.remove("groupomaniaId");
 
@@ -50,7 +80,6 @@ function logout(page) {
     headers: { "Content-Type": "application/json" },
     credentials: "include",
   };
-  console.log(requestOptions);
   return fetchApi("auth/logout", page, requestOptions)
     .then((response) => {
       console.log(response.json());
@@ -61,31 +90,47 @@ function logout(page) {
     .catch((error) => console.log(error));
 }
 
-const getAccount = (accountId, page) => {
+function getAccount(accountId, page) {
   const requestOptions = {
     method: "GET",
     credentials: "include",
   };
   return fetchApi(`auth/account/${accountId}`, page, requestOptions);
-};
+}
 
-const deleteAccount = (accountId, page) => {
+function editAccount(firstname, surname, accountId, page) {
+  const requestOptions = {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      name: firstname,
+      surname: surname,
+    }),
+  };
+
+  return fetchApi(`auth/account/${accountId}`, page, requestOptions);
+}
+
+function deleteAccount(accountId, page) {
   const requestOptions = {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
   };
 
-  return fetchApi(`auth/account/${accountId}`, page, requestOptions)
-    
-};
+  return fetchApi(`auth/account/${accountId}`, page, requestOptions);
+}
 
 export {
   getEmailFromCrypto,
   REGEX,
   getAccount,
+  editAccount,
   deleteAccount,
   getIdFromCookie,
   isLogged,
   logout,
+  login,
+  signup,
 };

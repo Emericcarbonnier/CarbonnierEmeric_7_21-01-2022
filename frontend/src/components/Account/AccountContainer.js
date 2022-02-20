@@ -13,7 +13,7 @@ const AccountContainer = (params) => {
   const { id } = useParams();
   const [refetch, setRefetch] = useState(false);
 
-  async function fetchAccount() {
+ function fetchAccount() {
     getAccount(id).then(
       (res) => {
         if (res.status === 200) {

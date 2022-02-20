@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const cryptoJS = require("crypto-js");
-const functions = require("./functions");
+const functions = require("../utils/functions");
 const models = require("../models");
 
 const EMAIL_REGEX =
@@ -17,7 +17,7 @@ function incrementLoginAttempt(emailHash, loginAttempts) {
   );
 }
 
-exports.signup = (req, res, next) => {
+exports.signup = async (req, res, next) => {
   let name = req.body.name;
   let surname = req.body.surname;
   let password = req.body.password;
@@ -59,174 +59,153 @@ exports.signup = (req, res, next) => {
       error: "Password is not valid (must be length min 4 and include 1 number",
     });
   }
-
-  models.User.findOne({
-    attributes: ["emailHash"],
-    where: { emailHash: emailHash },
-  })
-    .then((user) => {
-      if (!user) {
-        bcrypt
-          .hash(password, 10)
-          .then(async (hash) => {
-            const newUser = await models.User.create({
-              name: name,
-              surname: surname,
-              email: emailEncrypted,
-              emailHash: emailHash,
-              password: hash,
-              admin: 0,
-            });
-            newUser
-              .save()
-              .then(() =>
-                res.status(201).json({
-                  message:
-                    "Utilisateur créé ! " + "userId " + ": " + newUser.id,
-                })
-              )
-              .catch((error) => res.status(400).json({ error }));
-          })
-          .catch((error) => res.status(500).json({ error }));
-      } else {
-        return res.status(409).json({ error: "email already used" });
-      }
-    })
-    .catch((error) => {
-      return res.status(500).json({ error: "unable to verify user" });
+  try {
+    const user = await models.User.findOne({
+      attributes: ["emailHash"],
+      where: { emailHash: emailHash },
     });
+    if (!user) {
+      try {
+        const hash = await bcrypt.hash(password, 10);
+
+        const newUser = await models.User.create({
+          name: name,
+          surname: surname,
+          email: emailEncrypted,
+          emailHash: emailHash,
+          password: hash,
+          admin: 0,
+        });
+
+        try {
+          await newUser.save();
+
+          res.status(201).json({
+            message: "Utilisateur créé ! " + "userId " + ": " + newUser.id,
+          });
+        } catch (error) {
+          res.status(400).json({ error });
+        }
+      } catch (error) {
+        res.status(500).json({ error });
+      }
+    } else {
+      return res.status(409).json({ error: "email already used" });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: "unable to verify user" });
+  }
 };
 
-exports.login = (req, res, next) => {
+exports.login = async (req, res, next) => {
   let emailHash = cryptoJS.MD5(req.body.email).toString();
   let password = req.body.password;
 
-  if (emailHash == null || password == null) {
+  if (emailHash == "" || password == "") {
     return res.status(400).json({ error: "Missing parameters" });
   }
+  try {
+    const user = await models.User.findOne({
+      where: { emailHash: emailHash },
+    });
+    if (!user) {
+      return res
+        .status(401)
+        .json({ error: "Nom d'utilisateur (ou mot de passe) incorrect" });
+    }
 
-  models.User.findOne({
-    where: { emailHash: emailHash },
-  })
-    .then((user) => {
-      if (!user) {
-        return res
-          .status(401)
-          .json({ error: "Nom d'utilisateur (ou mot de passe) incorrect" });
+    if (functions.checkIfAccountIsLocked(user.lock_until)) {
+      let waitingTime = (user.lock_until - Date.now()) / 1000 / 60;
+      return res.status(402).json({
+        error: "Compte bloqué, revenez dans: " + waitingTime + " minutes",
+      });
+    }
+
+    if (user.lock_until && user.lock_until <= Date.now()) {
+      try {
+        await functions.resetUserLockAttempt(emailHash, user);
+
+        const valid = await bcrypt.compare(req.body.password, user.password);
+
+        if (!valid) {
+          await functions.incrementLoginAttempt(emailHash, user);
+
+          return res
+            .status(403)
+            .json({ error: "Mot de passe (ou email) incorrect !" });
+        } else {
+          await functions.sendNewToken(user._id, res);
+        }
+      } catch (error) {
+        return res.status(500).json({ error });
       }
+    } else {
+      try {
+        const valid = await bcrypt.compare(req.body.password, user.password);
+        if (!valid && user.login_attempts + 1 >= MAX_LOGIN_ATTEMPTS) {
+          await functions.blockUserAccount(emailHash, user);
+          return res.status(404).json({
+            error:
+              "Mot de passe (ou email) incorrect ! Vous avez atteint le nombre maximum d'essai, votre compte est maintenant bloqué!",
+          });
+        }
 
-      if (functions.checkIfAccountIsLocked(user.lock_until)) {
-        let waitingTime = (user.lock_until - Date.now()) / 1000 / 60;
-        return res.status(401).json({
-          error: "Compte bloqué, revenez dans: " + waitingTime + " minutes",
-        });
+        if (!valid && user.login_attempts + 1 < MAX_LOGIN_ATTEMPTS) {
+          await functions.incrementLoginAttempt(emailHash, user);
+          return res
+            .status(401)
+            .json({ error: "Mot de passe (ou email) incorrect !" });
+        }
+
+        if (user.login_attempts > 0) {
+          await functions.resetUserLockAttempt(emailHash, user);
+
+          await functions.sendNewToken(user, res);
+        } else {
+          functions.sendNewToken(user, res);
+        }
+      } catch (error) {
+        return res.status(500).json({ error: error });
       }
-
-      if (user.lock_until && user.lock_until <= Date.now()) {
-        functions
-          .resetUserLockAttempt(emailHash, user)
-          //
-          .then(() => {
-            bcrypt
-              .compare(req.body.password, user.password)
-              .then((valid) => {
-                if (!valid) {
-                  functions
-                    .incrementLoginAttempt(emailHash, user)
-                    .catch((error) => console.log({ error }));
-                  //
-                  return res
-                    .status(401)
-                    .json({ error: "Mot de passe (ou email) incorrect !" });
-                } else {
-                  functions.sendNewToken(user._id, res);
-                }
-              })
-              .catch((error) => res.status(500).json({ error }));
-          })
-          .catch((error) => console.log({ error }));
-        //
-      } else {
-        bcrypt
-          .compare(req.body.password, user.password)
-          .then((valid) => {
-            if (!valid && user.login_attempts + 1 >= MAX_LOGIN_ATTEMPTS) {
-              functions
-                .blockUserAccount(emailHash, user)
-                .catch((error) => console.log({ error }));
-              return res.status(401).json({
-                error:
-                  "Mot de passe (ou email) incorrect ! Vous avez atteint le nombre maximum d'essai, votre compte est maintenant bloqué!",
-              });
-            }
-
-            if (!valid && user.login_attempts + 1 < MAX_LOGIN_ATTEMPTS) {
-        
-
-              try {
-                functions.incrementLoginAttempt(emailHash, user);
-              } catch (e) {
-                console.log(e);
-              }
-              //
-              return res
-                .status(401)
-                .json({ error: "Mot de passe (ou email) incorrect !" });
-            }
-
-            if (user.login_attempts > 0) {
-              functions
-                .resetUserLockAttempt(emailHash, user)
-                .then(() => {
-                  functions.sendNewToken(user, res);
-                })
-                .catch((error) => console.log({ error }));
-            } else {
-              functions.sendNewToken(user, res);
-            }
-          })
-          .catch((error) => res.status(500).json({ error: error }));
-      }
-    })
-    .catch((error) => res.status(500).json({ error }));
+    }
+  } catch (error) {
+    res.status(500).json({ error });
+  }
 };
 
 exports.logout = (req, res, next) => {
   functions.eraseCookie(res);
 };
 
-exports.getUserProfile = (req, res, next) => {
+exports.getUserProfile = async (req, res, next) => {
   let userInfos = functions.getInfosUserFromToken(req, res);
   let CurrentUserId = req.params.id;
 
   if (userInfos.userId < 0) {
     return res.status(400).json({ error: "Wrong token" });
   }
-
-  models.User.findOne({
+  const user = await models.User.findOne({
     attributes: ["id", "name", "surname", "email", "createdAt"],
     where: { id: CurrentUserId },
-  })
-    .then((user) => {
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-      }
-      if ((user && user.id === userInfos.userId) || userInfos.admin === true) {
-        user.dataValues.canEdit = true;
-        if (userInfos.admin === true) {
-          user.dataValues.isAdmin = true;
-          res.status(200).json(user);
-        } else {
-          res.status(200).json(user);
-        }
-      } else if (user) {
-        res.status(200).json(user);
-      }
-    })
+  });
 
+  if (!user) {
+    res.status(404).json({ error: "User not found" });
+  }
+  if ((user && user.id === userInfos.userId) || userInfos.admin === true) {
+    user.dataValues.canEdit = true;
+    if (userInfos.admin === true) {
+      user.dataValues.isAdmin = true;
+      res.status(200).json(user);
+    } else {
+      res.status(200).json(user);
+    }
+  } else if (user) {
+    res.status(200).json(user);
+  }
 };
 
-exports.updateUserProfile = (req, res, next) => {
+exports.updateUserProfile = async (req, res, next) => {
   let userInfos = functions.getInfosUserFromToken(req, res);
   let CurrentUserId = req.params.id;
 
@@ -238,37 +217,34 @@ exports.updateUserProfile = (req, res, next) => {
   let name = req.body.name;
   let surname = req.body.surname;
 
-  models.User.findOne({
-    attributes: ["id", "name", "surname"],
-    where: { id: CurrentUserId },
-  })
-    .then((user) => {
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-      }
-      if ((user && user.id === userInfos.userId) || userInfos.admin === true) {
-        user
-          .update({
-            name: name ? name : user.name,
-            surname: surname ? surname : user.surname,
-          })
-          .then((updated) => {
-            if (updated) {
-              res.status(201).json("Profile mis à jour");
-            } else {
-              res.status(500).json({ error: "Cannot update profile" });
-            }
-          });
-      } else {
-        res.status(400).json({ error: "User not found" });
-      }
-    })
-    .catch((error) => {
-      res.status(500).json({ error: "Unable to verify user" });
+  try {
+    const user = await models.User.findOne({
+      attributes: ["id", "name", "surname"],
+      where: { id: CurrentUserId },
     });
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+    }
+    if ((user && user.id === userInfos.userId) || userInfos.admin === true) {
+      const updated = await user.update({
+        name: name ? name : user.name,
+        surname: surname ? surname : user.surname,
+      });
+
+      if (updated) {
+        res.status(201).json("Profile mis à jour");
+      } else {
+        res.status(500).json({ error: "Cannot update profile" });
+      }
+    } else {
+      res.status(400).json({ error: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Unable to verify user" });
+  }
 };
 
-exports.deleteUserProfile = (req, res) => {
+exports.deleteUserProfile = async (req, res) => {
   let userInfos = functions.getInfosUserFromToken(req, res);
   let CurrentUserId = req.params.id;
 
@@ -276,26 +252,23 @@ exports.deleteUserProfile = (req, res) => {
     return res.status(400).json({ error: "Wrong token" });
   }
 
-  models.User.findOne({
-    where: { id: CurrentUserId },
-    attributes: ["id", "name", "surname", "email", "createdAt"],
-  })
-    .then((user) => {
-
-      if ((user && user.id === userInfos.userId) || userInfos.admin === true) {
-        async function destroyUser(userId) {
-          await models.User.destroy({
-            where: { id: userId },
-          });
-        }
-        destroyUser(user.id)
-          .then(() => {
-            res.status(200).json({ message: "User supprimé !" });
-          })
-          .catch((error) => res.status(400).json({ error }));
-      }
-    })
-    .catch((error) => {
-      return res.status(404).json({ error: error });
+  try {
+    const user = await models.User.findOne({
+      where: { id: CurrentUserId },
+      attributes: ["id", "name", "surname", "email", "createdAt"],
     });
+
+    if ((user && user.id === userInfos.userId) || userInfos.admin === true) {
+      try {
+        await functions.destroyUser(user);
+
+        res.status(200).json({ message: "User supprimé !" });
+      } catch (error) {
+        return res.status(400).json({ error });
+      }
+    }
+  } catch (error) {
+    return res.status(404).json({ error: error });
+  }
 };
+ 

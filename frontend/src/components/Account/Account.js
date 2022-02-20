@@ -58,16 +58,6 @@ const Account = ({ ...account }) => {
           </p>
         </div>
         <div className="card-footer">
-          {/* <a href="#" className="card-link">
-            <i className="fa fa-gittip"></i> Like
-          </a>
-          <a href="#" className="card-link">
-            <i className="fa fa-comment"></i> Comment
-          </a>
-          <a href="#" className="card-link">
-            <i className="fa fa-mail-forward"></i> Share
-          </a> */}
-
           {account.canEdit === true && (
             <a
               href={"/account/" + account.id + "/edit"}
@@ -83,7 +73,7 @@ const Account = ({ ...account }) => {
               className="card-link text-danger"
               onClick={onClickDeleteAccount}
             >
-              <i className="fa fa-ban"></i> Erase
+              <i className="fa fa-ban"></i> Effacer
             </a>
           )}
         </div>

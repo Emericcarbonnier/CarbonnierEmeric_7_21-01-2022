@@ -1,9 +1,15 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
-import { getEmailFromCrypto, REGEX } from "../../_utils/auth/auth.functions";
+import { useParams, useHistory } from "react-router-dom";
+
+import {
+  editAccount,
+  getEmailFromCrypto,
+  REGEX,
+} from "../../_utils/auth/auth.functions";
 import { userModified } from "../../_utils/toasts/users";
 
 const EditAccount = ({ ...account }) => {
+  const history = useHistory();
   const { id } = useParams();
   const [emailValue, setEmailValue] = useState(
     getEmailFromCrypto(account.email)
@@ -11,27 +17,17 @@ const EditAccount = ({ ...account }) => {
   const [firstnameValue, setFirstnameValue] = useState(account.name);
   const [surnameValue, setSurnameValue] = useState(account.surname);
 
-  const SendData = (e) => {
+  const SendData = async (e) => {
     e.preventDefault();
-    const requestOptions = {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        name: firstnameValue,
-        surname: surnameValue,
-      }),
-    };
-    fetch(`http://localhost:3000/api/auth/account/${id}`, requestOptions)
-      .then((response) => {
-        console.log(response.json());
-        if (response.ok) {
-          userModified();
-          account.onPost();
-        }
-      })
-      .catch((error) => console.log(error));
+
+    const response = await editAccount(firstnameValue, surnameValue, id);
+    if (response.ok) {
+      userModified();
+      account.onPost();
+      history.push(`/account/${account.id}`);
+    }
   };
+
   return (
     <div className="col-11 mb-3">
       <div className="card">
@@ -40,7 +36,9 @@ const EditAccount = ({ ...account }) => {
             <div className="justify-content-between align-items-center">
               <div className="ml-2">
                 <div className="h5 m-0">@{account.name}</div>
-                <div className="h7 text-muted">{account.name} {account.surname}</div>
+                <div className="h7 text-muted">
+                  {account.name} {account.surname}
+                </div>
               </div>
             </div>
           </div>
@@ -91,21 +89,6 @@ const EditAccount = ({ ...account }) => {
                 onChange={(event) => setEmailValue(event.target.value)}
               />
             </div>
-            {/* <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                className="form-control"
-                placeholder="Password"
-                pattern={REGEX.PASSWORD_REGEX}
-                title="Minimum de 4 lettres et 1 chiffre"
-                value={passwordValue}
-                onChange={(event) => setPasswordValue(event.target.value)}
-              />
-            </div> */}
-
             <button type="submit" className="btn btn-primary">
               Edit
             </button>

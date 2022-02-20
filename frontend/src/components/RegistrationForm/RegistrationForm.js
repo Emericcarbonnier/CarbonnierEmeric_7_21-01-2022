@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import logo from "../../images/icon-above-font.svg";
 import { userRegistered } from "../../_utils/toasts/users";
-import {REGEX} from "../../_utils/auth/auth.functions"
+import { REGEX, signup } from "../../_utils/auth/auth.functions";
 
 const RegistrationForm = () => {
   const [emailValue, setEmailValue] = useState("");
@@ -11,32 +11,20 @@ const RegistrationForm = () => {
   const [surnameValue, setSurnameValue] = useState("");
   const history = useHistory();
 
-  const SendData = (e) => {
+  const SendData = async (e) => {
     e.preventDefault();
-    console.log(emailValue, passwordValue, firstnameValue, surnameValue);
 
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        name: firstnameValue,
-        surname: surnameValue,
-        email: emailValue,
-        password: passwordValue,
-      }),
-    };
-    fetch("http://localhost:3000/api/auth/signup", requestOptions)
-      .then((response) => {
-        console.log(response.json());
-        if (response.ok) {
-          // Redirection
-          userRegistered();
-          history.push("/");
-        }
-      })
-      .catch((error) => console.log(error));
-
+    const response = await signup(
+      firstnameValue,
+      surnameValue,
+      emailValue,
+      passwordValue
+    );
+    if (response.ok) {
+      // Redirection
+      userRegistered();
+      history.push("/");
+    }
   };
 
   return (

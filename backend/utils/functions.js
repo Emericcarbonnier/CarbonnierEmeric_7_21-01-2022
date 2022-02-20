@@ -2,38 +2,33 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 
-
 // 1 minutes of lock
 const LOCK_TIME = 60 * 1000;
 //
-function comparePassword (password, userPassword, res) {
-bcrypt
-    .compare(password, userPassword)
-    .then((valid) => {
+async function comparePassword(password, userPassword, res) {
+  try {
+    const valid = await bcrypt.compare(password, userPassword);
 
-      if (!valid) {
-        console.log("password invalide");
-        return res
-          .status(401)
-          .json({ error: "Mot de passe (ou email) incorrect !" });
-      } else {
-        console.log("Good Password");
-      }
-    })
-    .catch((error) => res.status(500).json({ error }));
+    if (!valid) {
+      return res
+        .status(401)
+        .json({ error: "Mot de passe (ou email) incorrect !" });
+    }
+  } catch (error) {
+    res.status(500).json({ error });
+  }
 }
- 
-function checkPassword(password) {
 
+function checkPassword(password) {
   const regularExp = RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{4,}$");
   if (regularExp.test(password)) {
     console.log("Strong password!");
-    return true;  
+    return true;
   } else {
     console.log("Weak password!");
     return false;
   }
-} 
+}
 
 function checkIfAccountIsLocked(userLockUntil) {
   console.log("Dans checkIfAccountIsLock");
@@ -59,7 +54,10 @@ async function incrementLoginAttempt(emailHash, user) {
 async function blockUserAccount(emailHash, user) {
   console.log("Dans blockUserAccount");
   return await user.update(
-    { login_attempts: user.login_attempts + 1, lock_until: Date.now() + LOCK_TIME },
+    {
+      login_attempts: user.login_attempts + 1,
+      lock_until: Date.now() + LOCK_TIME,
+    },
     {
       where: {
         emailHash: emailHash,
@@ -81,7 +79,7 @@ async function resetUserLockAttempt(emailHash, user) {
 }
 
 //envoie du token dans un cookie
-function sendNewToken(userData, res) {
+async function sendNewToken(userData, res) {
   newToken = jwt.sign(
     { userId: userData.id, admin: userData.admin },
     "RANDOM_TOKEN_SECRET",
@@ -89,9 +87,9 @@ function sendNewToken(userData, res) {
       expiresIn: "2h",
     }
   );
-  
+
   console.log("send new token");
-  return res
+  return await res
     .status(200)
     // expire dans 2h
     .cookie("token", newToken, { maxAge: 7200000, httpOnly: true })
@@ -109,9 +107,9 @@ function getInfosUserFromToken(req, res) {
     const token = req.cookies.token;
     const decodedToken = jwt.verify(token, "RANDOM_TOKEN_SECRET");
     let userInfos = {
-      userId :decodedToken.userId,
-      admin : decodedToken.admin
-    }
+      userId: decodedToken.userId,
+      admin: decodedToken.admin,
+    };
     userId = decodedToken.userId;
     if (userId == -1) {
       throw "Invalid user ID";
@@ -145,7 +143,6 @@ function isAdmin(req, res) {
   }
 }
 
-
 function eraseCookie(res) {
   return res
     .status(200)
@@ -153,6 +150,12 @@ function eraseCookie(res) {
     .json({
       message: "Utilisateur déconnecté",
     });
+}
+
+async function destroyUser(user) {
+  return await user.destroy({
+    where: { id: user.id },
+  });
 }
 
 exports.checkPassword = checkPassword;
@@ -165,3 +168,4 @@ exports.comparePassword = comparePassword;
 exports.getInfosUserFromToken = getInfosUserFromToken;
 exports.isAdmin = isAdmin;
 exports.eraseCookie = eraseCookie;
+exports.destroyUser = destroyUser;

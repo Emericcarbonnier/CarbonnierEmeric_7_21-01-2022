@@ -1,7 +1,7 @@
 import fetchApi from "../api/api.service";
 import { toastMessageDeleted } from "../toasts/messages";
 
-const getMessages = (page) => {
+function getMessages(page) {
   const requestOptions = {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -11,7 +11,7 @@ const getMessages = (page) => {
   return fetchApi(`messages`, page, requestOptions);
 };
 
-const getAllUserMessages = (userId, page) => {
+function getAllUserMessages(userId, page)  {
   const requestOptions = {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -21,7 +21,7 @@ const getAllUserMessages = (userId, page) => {
   return fetchApi(`messages/userMessages/${userId}`, page, requestOptions);
 };
 
-const getOneMessage = (messageId, page) => {
+function getOneMessage(messageId, page) {
   const requestOptions = {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -31,7 +31,7 @@ const getOneMessage = (messageId, page) => {
   return fetchApi(`messages/${messageId}`, page, requestOptions);
 };
 
-const deleteOneMessage = (messageId, page) => {
+function deleteOneMessage(messageId, page) {
   const requestOptions = {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
@@ -43,4 +43,19 @@ const deleteOneMessage = (messageId, page) => {
   );
 };
 
-export { getOneMessage, deleteOneMessage, getMessages, getAllUserMessages };
+function postMessage(title, content, page){
+  const requestOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      title: title,
+      content: content,
+    }),
+  };
+
+return fetchApi("messages/new", page, requestOptions);
+
+}
+
+export { getOneMessage, deleteOneMessage, getMessages, getAllUserMessages, postMessage };

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toastMessagePosted } from "../../_utils/toasts/messages";
 import "react-toastify/dist/ReactToastify.css";
 import { REGEX } from "../../_utils/auth/auth.functions";
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import { postMessage } from "../../_utils/messages/messages.functions";
 
 const PostMessage = ({ onPost }) => {
   const [titleValue, setTitleValue] = useState("");
@@ -10,32 +10,16 @@ const PostMessage = ({ onPost }) => {
 
   async function SendData(e) {
     e.preventDefault();
-    console.log(titleValue, contentValue);
 
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        title: titleValue,
-        content: contentValue,
-      }),
-    };
-    await fetch("http://localhost:3000/api/messages/new", requestOptions)
-      .then((response) => {
-        if (response.status !== 201) {
-
-        } else {
-          onPost();
-          setTitleValue("");
-          setContentValue("");
-          toastMessagePosted();
-        }
-      })
-
-      .catch((error) => console.log(error));
-
+    const response = await postMessage(titleValue, contentValue);
+    if (response.ok) {
+      onPost();
+      setTitleValue("");
+      setContentValue("");
+      toastMessagePosted();
+    }
   }
+
   return (
     <section className="row justify-content-center mb-5">
       <form
