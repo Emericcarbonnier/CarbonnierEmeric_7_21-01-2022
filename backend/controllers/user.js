@@ -2,7 +2,8 @@ const bcrypt = require("bcrypt");
 const cryptoJS = require("crypto-js");
 const functions = require("../utils/functions");
 const models = require("../models");
-
+require("dotenv").config();
+let secret_pass = process.env.SECRET_PASSPHRASE;
 const EMAIL_REGEX =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -27,7 +28,7 @@ exports.signup = async (req, res, next) => {
 
   let emailEncrypted = cryptoJS.AES.encrypt(
     req.body.email,
-    "Secret Passphrase"
+    secret_pass
   ).toString();
 
   if (
@@ -271,4 +272,3 @@ exports.deleteUserProfile = async (req, res) => {
     return res.status(404).json({ error: error });
   }
 };
- 

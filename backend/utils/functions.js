@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
+require("dotenv").config();
+let token_key = process.env.TOKEN_KEY;
 
 // 1 minutes of lock
 const LOCK_TIME = 60 * 1000;
@@ -82,13 +84,12 @@ async function resetUserLockAttempt(emailHash, user) {
 async function sendNewToken(userData, res) {
   newToken = jwt.sign(
     { userId: userData.id, admin: userData.admin },
-    "RANDOM_TOKEN_SECRET",
+    token_key,
     {
       expiresIn: "2h",
     }
   );
 
-  console.log("send new token");
   return await res
     .status(200)
     // expire dans 2h
@@ -105,7 +106,7 @@ function getInfosUserFromToken(req, res) {
   try {
     let userId = -1;
     const token = req.cookies.token;
-    const decodedToken = jwt.verify(token, "RANDOM_TOKEN_SECRET");
+    const decodedToken = jwt.verify(token, token_key);
     let userInfos = {
       userId: decodedToken.userId,
       admin: decodedToken.admin,
@@ -127,7 +128,7 @@ function isAdmin(req, res) {
   try {
     let userId = -1;
     const token = req.cookies.token;
-    const decodedToken = jwt.verify(token, "RANDOM_TOKEN_SECRET");
+    const decodedToken = jwt.verify(token, token_key);
     let isAdmin = decodedToken.admin;
     userId = decodedToken.userId;
 
