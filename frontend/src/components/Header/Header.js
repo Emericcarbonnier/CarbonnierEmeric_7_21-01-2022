@@ -2,8 +2,8 @@ import logo from "../../images/icon.png";
 
 const Header = () => {
   return (
-    <header className="container-fluid p-0">
-      <nav className="navbar navbar-light bg-light">
+    <header className="container-fluid p-0 ">
+      <nav className="navbar navbar-dark -top bg-dark">
         <a className="navbar-brand" href="/">
           <img
             src={logo}
@@ -15,13 +15,13 @@ const Header = () => {
           Groupomania
         </a>
         <ul className="nav justify-content-end">
-          <li className="nav-item fs-1">
-            <a className="nav-link" aria-current="page" href="/signup">
+          <li className="nav-item">
+            <a className="nav-link text-white" aria-current="page" href="/signup">
               Créer un compte
             </a>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="/login">
+            <a className="nav-link text-white" href="/login">
               Connexion
             </a>
           </li>

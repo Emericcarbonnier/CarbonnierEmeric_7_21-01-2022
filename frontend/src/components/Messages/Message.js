@@ -10,16 +10,18 @@ const Message = ({ ...message }) => {
       window.location.href = "/";
     }
   };
-console.log(message.imageUrl)
   return (
-    <div className="card">
+    <div className="card bg-dark text-white ">
       <div className="card-header">
         <div className="justify-content-between align-items-center">
           <div className="justify-content-between align-items-center">
             <div className="ml-2">
-              <a className="card-link" href={"/account/" + message.User.id}>
-                <div className="h5 m-0">@{message.User.name}</div>
-                <div className="h7 text-muted">
+              <a
+                className="card-link text-primary text-decoration-none"
+                href={"/account/" + message.User.id}
+              >
+                <div className="h5 m-0 text-primary">@{message.User.surname}</div>
+                <div className="h7 text-muted-primary ">
                   {message.User.name} {message.User.surname}
                 </div>
               </a>
@@ -27,14 +29,14 @@ console.log(message.imageUrl)
           </div>
         </div>
       </div>
-      <div className="card-body">
-        <div className="text-muted h7 mb-2">
+      <div className="card-body ">
+        <div className="text-primary h7 mb-2 ">
           {" "}
-          <i className="fa fa-clock-o" />
+          <i className="fa fa-clock-o " />
           {" " + globalFunctions.convertDateForHuman(message.createdAt)}
         </div>
-        <a className="card-link" href={"/messages/" + message.id}>
-          <h2 className="h5 card-title">{message.title}</h2>
+        <a className="card-link text-primary text-decoration-none" href={"/messages/" + message.id}>
+          <h2 className=" h3 card-title text-white ">{message.title}</h2>
         </a>
 
         {message.teaserMessage ? (
@@ -50,7 +52,7 @@ console.log(message.imageUrl)
           // eslint-disable-next-line jsx-a11y/anchor-is-valid
           <a
             href="#"
-            className="card-link text-danger"
+            className="card-link h5 text-danger"
             onClick={onClickDeleteMessage}
           >
             <i className="fa fa-ban"></i> Effacer

@@ -28,14 +28,14 @@ const Account = ({ ...account }) => {
     }
   };
   return (
-    <div className="col-11 mb-3">
-      <div className="card">
-        <div className="card-header">
+    <div className="col-11 mb-5">
+      <div className="card bg-dark text-white">
+        <div className="card-header text-primary">
           <div className="justify-content-between align-items-center">
             <div className="justify-content-between align-items-center">
-              <div className="ml-2">
-                <div className="h5 m-0">@{account.name}</div>
-                <div className="h7 text-muted">
+              <div className="ml-2 ">
+                <div className="h5 m-0">@{account.surname}</div>
+                <div className="h7 text-muted-primary">
                   {account.name} {account.surname}
                 </div>
               </div>
@@ -43,25 +43,25 @@ const Account = ({ ...account }) => {
           </div>
         </div>
         <div className="card-body">
-          <div className="text-muted h7 mb-2">
+          <div className="text-muted-primary h7 mb-4">
             {" "}
             <i className="fa fa-clock-o" />
             {" Membre depuis le " +
               functions.convertDateForHuman(account.createdAt)}
           </div>
 
-          <h2 className="h5 card-title">Informations:</h2>
+          <h2 className="h5 card-title mb-4">Informations:</h2>
           <p className="card-text">Nom : {account.name}</p>
           <p className="card-text">Prénom: {account.surname}</p>
           <p className="card-text">
             Email: {getEmailFromCrypto(account.email)}
           </p>
         </div>
-        <div className="card-footer">
+        <div className="card-footer mt-3">
           {account.canEdit === true && (
             <a
               href={"/account/" + account.id + "/edit"}
-              className="card-link text-dark"
+              className="card-link text-danger"
             >
               <i className="fa fa-edit"></i> Edit
             </a>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import logo from "../../images/icon-above-font.svg";
+import logo from "../../images/icon-left-font-monochrome-white.png";
 import { userRegistered } from "../../_utils/toasts/users";
 import { REGEX, signup } from "../../_utils/auth/auth.functions";
 
@@ -29,23 +29,23 @@ const RegistrationForm = () => {
 
   return (
     <section className="row mx-auto justify-content-center w-50">
-      <div className="card col-11">
+      <div className="card col-11 bg-secondary">
         <img
-          className="mx-auto w-50"
+          className="mx-auto mt-0 w-50"
           src={logo}
           alt="logo of the company Groupomania"
         />
         <div className="card-body">
-          <h1 className="h5 card-title text-center mb-5">Creer un compte</h1>
+          <h1 className="h5 card-title text-center mb-4 fw-bold text-white">Créer un compte</h1>
 
           <form onSubmit={SendData}>
             <div className="form-group">
-              <label htmlFor="nom">Nom</label>
+              <label className='fw-bold mb-2' htmlFor="nom">Nom</label>
               <input
                 id="nom"
                 name="nom"
                 type="text"
-                className="form-control"
+                className="form-control mb-3"
                 placeholder="Nom"
                 value={firstnameValue}
                 required
@@ -54,12 +54,12 @@ const RegistrationForm = () => {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="prenom">Prénom</label>
+              <label className='fw-bold mb-2' htmlFor="prenom">Prénom</label>
               <input
                 id="prenom"
                 name="prenom"
                 type="text"
-                className="form-control"
+                className="form-control mb-3"
                 placeholder="Prénom"
                 value={surnameValue}
                 required
@@ -68,12 +68,12 @@ const RegistrationForm = () => {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="email">Adresse email</label>
+              <label className='fw-bold mb-2' htmlFor="email">Adresse email</label>
               <input
                 id="email"
                 name="email"
                 type="email"
-                className="form-control"
+                className="form-control mb-3"
                 aria-describedby="emailHelp"
                 placeholder="email@exemple.com"
                 value={emailValue}
@@ -82,12 +82,12 @@ const RegistrationForm = () => {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="password">Password</label>
+              <label className='fw-bold mb-2' htmlFor="password">Password</label>
               <input
                 id="password"
                 name="password"
                 type="password"
-                className="form-control"
+                className="form-control mb-3"
                 placeholder="Password"
                 value={passwordValue}
                 required

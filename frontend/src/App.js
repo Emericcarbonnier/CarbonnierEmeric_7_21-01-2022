@@ -36,7 +36,7 @@ const App = () => {
     
 
     {isLoggedIn ? <LoggedHeader onLogout={handleLogout} /> : <Header />}
-    <main className="container-fluid">
+ 
     <Switch>
 
 
@@ -67,7 +67,6 @@ const App = () => {
       </Route>
 
     </Switch>
-    </main>
   </React.Fragment>
   );
 };

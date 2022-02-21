@@ -21,18 +21,17 @@ const PostMessage = ({ onPost }) => {
   }
 
   return (
-    <section className="row justify-content-center mb-5">
+    <section className="row mx-auto justify-content-center mb-5 w-75 ">
       <form
         className="col-11"
-        encType="multipart/form-data"
         onSubmit={SendData}
       >
-        <div className="card">
+        <div className="card bg-dark text-white p-2">
           <div className="card-header ">Publier un article</div>
           <div className="card-body">
             <div className="tab-content" id="myTabContent">
               <div className="tab-pane fade show active" id="posts">
-                <div className="form-group">
+                <div className="form-group mb-5">
                   <label className="sr-only" htmlFor="title">
                     title
                   </label>
@@ -57,7 +56,7 @@ const PostMessage = ({ onPost }) => {
                     className="form-control"
                     required
                     id="message"
-                    rows="3"
+                    rows="5"
                     placeholder="Minimum 5 mots"
                     value={contentValue}
                     minLength="5"
@@ -68,7 +67,7 @@ const PostMessage = ({ onPost }) => {
             </div>
             <div className="btn-toolbar justify-content-between">
               <div className="btn-group">
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn btn-primary mt-4">
                   Publier
                 </button>
               </div>

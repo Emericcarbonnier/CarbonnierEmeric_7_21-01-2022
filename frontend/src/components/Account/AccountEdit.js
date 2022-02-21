@@ -30,13 +30,13 @@ const EditAccount = ({ ...account }) => {
 
   return (
     <div className="col-11 mb-3">
-      <div className="card">
-        <div className="card-header">
+      <div className="card bg-dark text-white">
+        <div className="card-header text-primary">
           <div className="justify-content-between align-items-center">
             <div className="justify-content-between align-items-center">
               <div className="ml-2">
-                <div className="h5 m-0">@{account.name}</div>
-                <div className="h7 text-muted">
+                <div className="h5m-0 text-primary">@{account.surname}</div>
+                <div className="h7 text-muted-primary">
                   {account.name} {account.surname}
                 </div>
               </div>
@@ -44,16 +44,16 @@ const EditAccount = ({ ...account }) => {
           </div>
         </div>
         <div className="card-body">
-          <h2 className="h5 card-title text-center">Edit Profile</h2>
+          <h2 className="h5 card-title text-center">Editer le Profil</h2>
 
           <form onSubmit={SendData}>
-            <div className="form-group">
-              <label htmlFor="nom">nom</label>
+            <div className="form-group mb-4">
+              <label htmlFor="nom">Nom</label>
               <input
                 id="nom"
                 name="nom"
                 type="text"
-                className="form-control"
+                className="form-control mt-2"
                 placeholder="Nom"
                 pattern={REGEX.NAME_REGEX}
                 value={firstnameValue}
@@ -61,13 +61,13 @@ const EditAccount = ({ ...account }) => {
                 onChange={(event) => setFirstnameValue(event.target.value)}
               />
             </div>
-            <div className="form-group">
+            <div className="form-group mb-4">
               <label htmlFor="prenom">Prénom</label>
               <input
                 id="prenom"
                 name="prenom"
                 type="text"
-                className="form-control"
+                className="form-control mt-2"
                 placeholder="Prénom"
                 pattern={REGEX.SURNAME_REGEX}
                 value={surnameValue}
@@ -75,18 +75,19 @@ const EditAccount = ({ ...account }) => {
                 onChange={(event) => setSurnameValue(event.target.value)}
               />
             </div>
-            <div className="form-group">
+            <div className="form-group mb-4">
               <label htmlFor="email">Adresse email</label>
               <input
                 id="email"
                 name="email"
                 type="email"
-                className="form-control"
-                aria-describedby="emailHelp"
+                className="form-control mt-2 bg-secondary"
+                aria-label="readonly input example"
                 placeholder="Enter email"
                 value={emailValue}
                 readOnly={true}
                 onChange={(event) => setEmailValue(event.target.value)}
+                disabled readonly
               />
             </div>
             <button type="submit" className="btn btn-primary">
@@ -94,7 +95,6 @@ const EditAccount = ({ ...account }) => {
             </button>
           </form>
         </div>
-        <div className="card-footer"></div>
       </div>
     </div>
   );

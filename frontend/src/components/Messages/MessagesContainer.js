@@ -20,80 +20,70 @@ const MessageContainer = ({ ...params }) => {
   const [totalItems, setTotalItems] = useState(0);
   const [refetch, setRefetch] = useState(0);
 
-  const fetchMessage = () => {
+  const fetchMessage = async () => {
     if (params.messageQuery === "getMessages") {
-      getMessages(page).then(
-        (res) => {
-          if (res.status === 200) {
-            res.json().then((result) => {
-              setMessages([...messages, ...result.messages]);
-              setTotalItems(result.totalItems);
-              console.log(result);
-              setIsLoaded(true);
-            });
-          } else if (res.status === 404) {
-            setError(404);
+      try {
+        const res = await getMessages(page);
+        if (res.status === 200) {
+          res.json().then((result) => {
+            setMessages([...messages, ...result.messages]);
+            setTotalItems(result.totalItems);
             setIsLoaded(true);
-          } else {
-            setError(res.statusText);
-            setIsLoaded(true);
-          }
-        },
-
-        (error) => {
-          setError(error);
+          });
+        } else if (res.status === 404) {
+          setError(404);
+          setIsLoaded(true);
+        } else {
+          setError(res.statusText);
           setIsLoaded(true);
         }
-      );
+      } catch (error) {
+        setError(error);
+        setIsLoaded(true);
+      }
     }
-    if (params.messageQuery === "getOneMessage") {
-      getOneMessage(id).then(
-        (res) => {
-          if (res.status === 200) {
-            res.json().then((result) => {
-              setMessages(result);
-              setIsLoaded(true);
-            });
-          } else if (res.status === 404) {
-            setError(404);
-            setIsLoaded(true);
-          } else {
-            setError(res.statusText);
-            setIsLoaded(true);
-          }
-        },
 
-        (error) => {
+    if (params.messageQuery === "getOneMessage") {
+      try {
+        const res = await getOneMessage(id);
+        if (res.status === 200) {
+          res.json().then((result) => {
+            setMessages(result);
+            setIsLoaded(true);
+          });
+        } else if (res.status === 404) {
+          setError(404);
           setIsLoaded(true);
-          setError(error);
+        } else {
+          setError(res.statusText);
+          setIsLoaded(true);
         }
-      );
+      } catch (error) {
+        setIsLoaded(true);
+        setError(error);
+      }
     }
 
     if (params.messageQuery === "getAllUserMessages") {
-      getAllUserMessages(id, page).then(
-        (res) => {
-          if (res.status === 200) {
-            res.json().then((result) => {
-              setMessages([...messages, ...result.messages]);
-              setTotalItems(result.totalItems);
-              console.log(result);
-              setIsLoaded(true);
-            });
-          } else if (res.status === 404) {
-            setError(404);
+      try {
+        const res = await getAllUserMessages(id, page);
+        if (res.status === 200) {
+          res.json().then((result) => {
+            setMessages([...messages, ...result.messages]);
+            setTotalItems(result.totalItems);
             setIsLoaded(true);
-          } else {
-            setError(res.statusText);
-            setIsLoaded(true);
-          }
-        },
-
-        (error) => {
-          setError(error);
+          });
+        } else if (res.status === 404) {
+          setError(404);
+          setIsLoaded(true);
+        } else {
+          setError(res.statusText);
           setIsLoaded(true);
         }
-      );
+      } catch (error) {
+        setError(error);
+        setIsLoaded(true);
+      }
     }
   };
 
@@ -101,7 +91,6 @@ const MessageContainer = ({ ...params }) => {
     fetchMessage();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, refetch]);
-
 
   const handlePost = () => {
     setRefetch((refetch) => refetch + 1);
@@ -132,7 +121,7 @@ const MessageContainer = ({ ...params }) => {
   } else if (messages && params.messageQuery === "getOneMessage") {
     return (
       <React.Fragment>
-        <section className="row justify-content-center">
+        <section className="row justify-content-center m-auto">
           <div className="col-12 mb-3">
             <Message {...messages} onErase={handleErase} />
           </div>
@@ -174,4 +163,5 @@ const MessageContainer = ({ ...params }) => {
     );
   }
 };
+
 export default MessageContainer;
