@@ -13,14 +13,13 @@ const AccountContainer = (params) => {
   const { id } = useParams();
   const [refetch, setRefetch] = useState(false);
 
- function fetchAccount() {
-    getAccount(id).then(
-      (res) => {
+ async function fetchAccount() {
+   try{
+    const res = await getAccount(id)
         if (res.status === 200) {
-          res.json().then((result) => {
+          const result = await res.json()
             setAccount(result);
             setIsLoaded(true);
-          });
         } else if (res.status === 404) {
           setError(404);
           setIsLoaded(true);
@@ -28,12 +27,11 @@ const AccountContainer = (params) => {
           setError(res.statusText);
           setIsLoaded(true);
         }
-      },
-      (error) => {
+      }
+      catch (error){
         setError(error);
         setIsLoaded(true);
       }
-    );
   }
 
   useEffect(() => {

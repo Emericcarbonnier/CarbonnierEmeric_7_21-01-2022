@@ -1,12 +1,13 @@
 import globalFunctions from "../../_utils/_functions";
 import { deleteOneMessage } from "../../_utils/messages/messages.functions";
-
+import { toastMessageDeleted } from "../../_utils/toasts/messages";
 const Message = ({ ...message }) => {
   const onClickDeleteMessage = (e) => {
     e.preventDefault();
     if (window.confirm("Êtes-vous sûr de vouloir supprimer votre message ?")) {
       deleteOneMessage(message.id);
       message.onErase();
+      toastMessageDeleted()
       window.location.href = "/";
     }
   };

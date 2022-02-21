@@ -1,5 +1,5 @@
 import fetchApi from "../api/api.service";
-import { toastMessageDeleted } from "../toasts/messages";
+
 
 function getMessages(page) {
   const requestOptions = {
@@ -38,10 +38,9 @@ function deleteOneMessage(messageId, page) {
     credentials: "include",
   };
 
-  return fetchApi(`messages/${messageId}`, page, requestOptions).then(() =>
-    toastMessageDeleted()
-  );
-};
+  // eslint-disable-next-line no-sequences
+  return fetchApi(`messages/${messageId}`, page, requestOptions);
+}
 
 function postMessage(title, content, page){
   const requestOptions = {
@@ -53,6 +52,7 @@ function postMessage(title, content, page){
       content: content,
     }),
   };
+
 
 return fetchApi("messages/new", page, requestOptions);
 

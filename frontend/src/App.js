@@ -36,23 +36,19 @@ const App = () => {
     
 
     {isLoggedIn ? <LoggedHeader onLogout={handleLogout} /> : <Header />}
-    
-    <Route path="/login">
-        <LoginForm onLogin={handleLogin} />
-      </Route>
+
+    <main className="">
  
     <Switch>
 
 
       <Route path="/" exact>
-      {isLoggedIn ? <MessagesContainer messageQuery="getMessages" postMessage={true} />  : <Redirect to="/login" />}
+      {isLoggedIn ? (<MessagesContainer messageQuery="getMessages" postMessage={true} />)  : (<Redirect to="/login" />)}
       </Route>
-
 
       <Route path="/login">
         <LoginForm onLogin={handleLogin} />
       </Route>
-
  
       <Route path="/signup" component={RegistrationForm} />
 
@@ -71,6 +67,7 @@ const App = () => {
       </Route>
 
     </Switch>
+    </main>
   </React.Fragment>
   );
 };

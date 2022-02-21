@@ -25,11 +25,10 @@ const MessageContainer = ({ ...params }) => {
       try {
         const res = await getMessages(page);
         if (res.status === 200) {
-          res.json().then((result) => {
+          const result = await res.json()
             setMessages([...messages, ...result.messages]);
             setTotalItems(result.totalItems);
             setIsLoaded(true);
-          });
         } else if (res.status === 404) {
           setError(404);
           setIsLoaded(true);
@@ -47,10 +46,9 @@ const MessageContainer = ({ ...params }) => {
       try {
         const res = await getOneMessage(id);
         if (res.status === 200) {
-          res.json().then((result) => {
+          const result = await res.json()
             setMessages(result);
             setIsLoaded(true);
-          });
         } else if (res.status === 404) {
           setError(404);
           setIsLoaded(true);
@@ -68,11 +66,10 @@ const MessageContainer = ({ ...params }) => {
       try {
         const res = await getAllUserMessages(id, page);
         if (res.status === 200) {
-          res.json().then((result) => {
+          const result = await res.json()
             setMessages([...messages, ...result.messages]);
             setTotalItems(result.totalItems);
             setIsLoaded(true);
-          });
         } else if (res.status === 404) {
           setError(404);
           setIsLoaded(true);

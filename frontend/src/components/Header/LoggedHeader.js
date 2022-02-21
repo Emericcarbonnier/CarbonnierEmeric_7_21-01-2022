@@ -2,6 +2,7 @@ import { useHistory } from "react-router-dom";
 import logo from "../../images/icon.png";
 import { logout } from "../../_utils/auth/auth.functions";
 import {getIdFromCookie} from "../../_utils/auth/auth.functions";
+import { userLogout } from "../../_utils/toasts/users";
 
 const LoggedHeader = ({ onLogout }) => {
   const idFromCookie = getIdFromCookie();
@@ -11,6 +12,7 @@ const LoggedHeader = ({ onLogout }) => {
     e.preventDefault();
     logout();
     onLogout();
+    userLogout()
     history.push("/");
   };
 

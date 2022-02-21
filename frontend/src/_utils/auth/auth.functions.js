@@ -2,8 +2,6 @@
 import fetchApi from "../api/api.service";
 import Cookies from "js-cookie";
 
-import { userLogout } from "../toasts/users";
-
 const CryptoJS = require("crypto-js");
 
 // Variables
@@ -55,7 +53,7 @@ function login(email, password, page) {
   return fetchApi("auth/login", page, requestOptions);
 }
 
-function signup(name, surname, email, password, page){
+function signup(name, surname, email, password, page) {
   const requestOptions = {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -71,7 +69,7 @@ function signup(name, surname, email, password, page){
   return fetchApi("auth/signup", page, requestOptions);
 }
 
-async function logout(page) {
+function logout(page) {
   Cookies.remove("groupomania");
   Cookies.remove("groupomaniaId");
 
@@ -80,14 +78,8 @@ async function logout(page) {
     headers: { "Content-Type": "application/json" },
     credentials: "include",
   };
-  return fetchApi("auth/logout", page, requestOptions)
-    .then((response) => {
-      console.log(response.json());
-      if (response.ok) {
-        userLogout();
-      }
-    })
-    .catch((error) => console.log(error));
+
+   return fetchApi("auth/logout", page, requestOptions);
 }
 
 function getAccount(accountId, page) {

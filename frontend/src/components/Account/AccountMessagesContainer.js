@@ -15,16 +15,14 @@ const AccountMessagesContainer = ({ ...params }) => {
   const [totalItems, setTotalItems] = useState(0);
   const [refetch, setRefetch] = useState(0);
 
-  const fetchMessage = () => {
-    getAllUserMessages(id, page).then(
-      (res) => {
+  const fetchMessage = async () => {
+    try{
+      const res = await getAllUserMessages(id, page);
         if (res.status === 200) {
-          res.json().then((result) => {
+          const result = await res.json()
             setMessages([...messages, ...result.messages]);
             setTotalItems(result.totalItems);
-            console.log(result);
             setIsLoaded(true);
-          });
         } else if (res.status === 404) {
           setError(404);
           setIsLoaded(true);
@@ -32,12 +30,13 @@ const AccountMessagesContainer = ({ ...params }) => {
           setError(res.statusText);
           setIsLoaded(true);
         }
-      },
-      (error) => {
+      }
+    
+      catch(error){
         setError(error);
         setIsLoaded(true);
       }
-    );
+
   };
 
   useEffect(() => {
