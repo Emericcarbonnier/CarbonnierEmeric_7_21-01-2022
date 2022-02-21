@@ -11,7 +11,7 @@ const xss = require('xss-clean');
 const app = express();
 
 app.use(helmet());
-app.use(cors({origin: "http://localhost:8081", credentials: true}));
+app.use(cors({origin: "http://localhost:3001", credentials: true}));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());

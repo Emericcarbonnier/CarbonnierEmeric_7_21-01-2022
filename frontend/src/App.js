@@ -36,6 +36,10 @@ const App = () => {
     
 
     {isLoggedIn ? <LoggedHeader onLogout={handleLogout} /> : <Header />}
+    
+    <Route path="/login">
+        <LoginForm onLogin={handleLogin} />
+      </Route>
  
     <Switch>
 
