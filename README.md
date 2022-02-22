@@ -30,9 +30,9 @@ node server
 Ouvrir un second terminal puis executé les commandes dans l'ordre
 
 ```
-*cd frontend
-*npm install
-*npm start
+cd frontend
+npm install
+npm start
 
 ```
 
